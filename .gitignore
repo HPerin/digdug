@@ -34,7 +34,6 @@
 
 ### CodeBlocks ###
 # specific to CodeBlocks IDE
-*.cbp
 *.layout
 *.depend
 
