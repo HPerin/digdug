@@ -19,8 +19,11 @@ Game::Game() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0f);
 
-    entities.push_back((Entity *const &) &player);
-    entities.push_back((Entity *const &) new World());
+    World * world = new World();
+    player = new Player(world);
+
+    entities.push_back((Entity *const &) player);
+    entities.push_back((Entity *const &) world);
 }
 
 Game::~Game() {
@@ -75,7 +78,7 @@ void Game::stepRender() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    player.setCamera();
+    player->setCamera();
     for (Entity * entity : entities) {
         entity->render();
     }
@@ -97,10 +100,17 @@ void Game::stepUpdates() {
     sf::Time elapsed = clock.getElapsedTime();
     clock.restart();
 
+    unsigned int xMiddle = window->getSize().x / 2;
+    unsigned int yMiddle = window->getSize().y / 2;
+    sf::Mouse::setPosition(sf::Vector2i(xMiddle, yMiddle), *window);
+    player->resetMouse(xMiddle, yMiddle);
+
     for (Entity * entity : entities) {
         entity->update(elapsed.asSeconds());
     }
 }
+
+
 
 
 

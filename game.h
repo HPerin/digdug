@@ -25,8 +25,9 @@ private:
 
     sf::Window * window;
     sf::Clock clock;
+    sf::Thread * mouseThread;
 
-    Player player;
+    Player * player;
     std::vector<Entity *> entities;
 
     void stepUpdates();

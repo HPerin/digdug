@@ -7,6 +7,7 @@
 
 #include <SFML/Window/Event.hpp>
 #include "entity.h"
+#include "world.h"
 
 typedef struct {
     float x;
@@ -18,20 +19,30 @@ typedef struct {
 
 class Player : Entity {
 public:
-    Player();
+    Player(World * world);
 
     void setCamera();
     void event(sf::Event event);
     void update(float dt);
+    void resetMouse(int x, int y);
     void render();
 
 private:
     position_t current;
 
-    bool leftPressed;
-    bool rightPressed;
-    bool upPressed;
-    bool downPressed;
+    bool leftPressed = false;
+    bool rightPressed = false;
+    bool upPressed = false;
+    bool downPressed = false;
+
+    int xOldMouse = 0;
+    int yOldMouse = 0;
+    int xDeltaMouse = 0;
+    int yDeltaMouse = 0;
+
+    World * world;
+
+    void generateCrack();
 };
 
 
