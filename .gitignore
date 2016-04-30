@@ -1,4 +1,50 @@
-.idea/
-build/
-*.exe
+
+# Created by https://www.gitignore.io/api/c++,codeblocks
+
+### C++ ###
+# Compiled Object files
+*.slo
+*.lo
 *.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+
+### CodeBlocks ###
+# specific to CodeBlocks IDE
+*.cbp
+*.layout
+*.depend
+
+# generated directories
+bin/
+obj/
+
+### CLion ###
+.idea/
+
+
+### CMake ###
+build/
