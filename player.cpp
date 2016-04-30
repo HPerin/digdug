@@ -6,8 +6,9 @@
 #include <iostream>
 #include "player.h"
 
-Player::Player(World * world) {
+Player::Player(World * world, sf::Window * window) {
     this->world = world;
+    this->window = window;
     current = { 0, 0, 0, 0, 0 };
 }
 
@@ -47,10 +48,13 @@ void Player::event(sf::Event event) {
             }
         } break;
         case sf::Event::MouseMoved: {
-            xDeltaMouse = event.mouseMove.x - xOldMouse;
-            xOldMouse = event.mouseMove.x;
-            yDeltaMouse = event.mouseMove.y - yOldMouse;
-            yOldMouse = event.mouseMove.y;
+            unsigned int xMiddle = window->getSize().x / 2;
+            unsigned int yMiddle = window->getSize().y / 2;
+            if (event.mouseMove.x != xMiddle || event.mouseMove.y != yMiddle) {
+                xDeltaMouse = event.mouseMove.x - xMiddle;
+                yDeltaMouse = event.mouseMove.y - yMiddle;
+                sf::Mouse::setPosition(sf::Vector2i(xMiddle, yMiddle), *window);
+            }
         } break;
         default: break;
     }
@@ -76,11 +80,11 @@ void Player::update(float dt) {
     }
 
     if (xDeltaMouse) {
-        current.roty += xDeltaMouse;
+        current.roty += 0.25 * xDeltaMouse;
         xDeltaMouse = 0;
     }
     if (yDeltaMouse) {
-        current.rotx += yDeltaMouse;
+        current.rotx += 0.25 * yDeltaMouse;
         if (current.rotx > 20)
             current.rotx = 20;
         if (current.rotx < -20)

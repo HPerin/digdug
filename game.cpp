@@ -20,7 +20,7 @@ Game::Game() {
     glClearDepth(1.0f);
 
     World * world = new World();
-    player = new Player(world);
+    player = new Player(world, window);
 
     entities.push_back((Entity *const &) player);
     entities.push_back((Entity *const &) world);
@@ -99,11 +99,6 @@ void Game::setPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdoub
 void Game::stepUpdates() {
     sf::Time elapsed = clock.getElapsedTime();
     clock.restart();
-
-    unsigned int xMiddle = window->getSize().x / 2;
-    unsigned int yMiddle = window->getSize().y / 2;
-    sf::Mouse::setPosition(sf::Vector2i(xMiddle, yMiddle), *window);
-    player->resetMouse(xMiddle, yMiddle);
 
     for (Entity * entity : entities) {
         entity->update(elapsed.asSeconds());

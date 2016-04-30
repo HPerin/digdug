@@ -25,7 +25,6 @@ private:
 
     sf::Window * window;
     sf::Clock clock;
-    sf::Thread * mouseThread;
 
     Player * player;
     std::vector<Entity *> entities;

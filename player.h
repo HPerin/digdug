@@ -19,7 +19,7 @@ typedef struct {
 
 class Player : Entity {
 public:
-    Player(World * world);
+    Player(World * world, sf::Window * window);
 
     void setCamera();
     void event(sf::Event event);
@@ -41,6 +41,7 @@ private:
     int yDeltaMouse = 0;
 
     World * world;
+    sf::Window * window;
 
     void generateCrack();
 };
