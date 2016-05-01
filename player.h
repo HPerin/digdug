@@ -24,26 +24,26 @@ public:
     void setCamera();
     void event(sf::Event event);
     void update(float dt);
-    void resetMouse(int x, int y);
     void render();
 
 private:
+    void generateCrack();
+    int getCurrentGridX();
+    int getCurrentGridZ();
+
     position_t current;
 
     bool leftPressed = false;
     bool rightPressed = false;
     bool upPressed = false;
     bool downPressed = false;
+    bool falling = false;
 
-    int xOldMouse = 0;
-    int yOldMouse = 0;
     int xDeltaMouse = 0;
     int yDeltaMouse = 0;
 
     World * world;
     sf::Window * window;
-
-    void generateCrack();
 };
 
 

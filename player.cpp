@@ -5,11 +5,12 @@
 #include <SFML/OpenGL.hpp>
 #include <iostream>
 #include "player.h"
+#include "data.h"
 
 Player::Player(World * world, sf::Window * window) {
     this->world = world;
     this->window = window;
-    current = { 0, 0, 0, 0, 0 };
+    current = { -10, 0, -10, 0, 0 };
 }
 
 void Player::setCamera() {
@@ -61,7 +62,16 @@ void Player::event(sf::Event event) {
 }
 
 void Player::update(float dt) {
-    static const float PI = 3.1415;
+    if (world->hasWater(getCurrentGridX(), getCurrentGridZ())) {
+        falling = true;
+    }
+
+    if (falling) {
+        current.y += dt;
+        if (current.y > 0.75)
+            window->close();
+        return;
+    }
 
     if (upPressed) {
         current.z += dt * 2 * std::cos(current.roty * PI/180);
@@ -110,13 +120,18 @@ void Player::generateCrack() {
     } else {
         direction = LEFT;
     }
-    world->generateCrack((int) std::abs(current.x) + 1, (int) std::abs(current.z) + 1, direction);
+    world->generateCrack(getCurrentGridX(), getCurrentGridZ(), direction);
 }
 
-void Player::resetMouse(int x, int y) {
-    xOldMouse = x;
-    yOldMouse = y;
+int Player::getCurrentGridX() {
+    return int(-current.x + 1);
 }
+
+int Player::getCurrentGridZ() {
+    return int(-current.z + 1);
+}
+
+
 
 
 

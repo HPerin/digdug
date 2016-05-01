@@ -13,7 +13,7 @@ set(HEADER_FILES
         game.h
         player.h
         world.h
-        entity.h enemy.cpp enemy.h)
+        entity.h enemy.cpp enemy.h data.h)
 add_executable(digdug2 ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(digdug2 -lsfml-window -lsfml-system -lsfml-graphics)
 target_link_libraries(digdug2 -lGLEW -lGL -lGLU -lm)

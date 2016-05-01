@@ -35,6 +35,7 @@ public:
     void render();
 
     void generateCrack(int ax, int ay, DIRECTION direction);
+    bool hasWater(int x, int y);
 
 private:
     void renderWater (int x, int y);

@@ -346,6 +346,12 @@ void World::fillWater(int x, int y) {
     }
 }
 
+bool World::hasWater(int x, int y) {
+    if (x < 0 || x > field_width) return true;
+    if (y < 0 || y > field_height) return true;
+    return field[x][y] == WATER;
+}
+
 
 
 

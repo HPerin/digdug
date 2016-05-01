@@ -6,6 +6,7 @@
 #include "game.h"
 #include "player.h"
 #include "world.h"
+#include "data.h"
 
 Game::Game() {
     window = new sf::Window(sf::VideoMode(800, 800), "DIG DUG II");
@@ -90,9 +91,8 @@ void Game::stepRender() {
 }
 
 void Game::setPerspective(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar) {
-    const GLdouble pi = 3.1415926535897932384626433832795;
     GLdouble fW, fH;
-    fH = tan( fovY / 360 * pi ) * zNear;
+    fH = tan( fovY / 360 * PI ) * zNear;
     fW = fH * aspect;
     glFrustum( -fW, fW, -fH, fH, zNear, zFar );
 }
