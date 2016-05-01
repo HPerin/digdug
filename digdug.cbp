@@ -23,6 +23,7 @@
 					<Add library="glu32" />
 					<Add library="sfml-system" />
 					<Add library="sfml-window" />
+					<Add library="sfml-graphics" />
 					<Add directory="win32/SFML/lib" />
 				</Linker>
 			</Target>
