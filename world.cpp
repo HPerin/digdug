@@ -17,6 +17,7 @@ void World::loadTextures() {
     if (!grassTexture.loadFromFile(GRASS_TEXTURE))
         exit(EXIT_FAILURE);
     grassTexture.setSmooth(true);
+
     if (!waterTexture.loadFromFile(WATER_TEXTURE))
         exit(EXIT_FAILURE);
     waterTexture.setSmooth(true);
@@ -55,7 +56,12 @@ void World::event(sf::Event event) {
 }
 
 void World::update(float dt) {
+    if (waterDirection == -1 && waterOffset < -1)
+        waterDirection = 1;
+    else if (waterDirection == 1 && waterOffset > 1)
+        waterDirection = 1;
 
+    waterOffset += dt * waterDirection;
 }
 
 void World::render() {
@@ -83,7 +89,7 @@ void World::render() {
 
 void World::renderWater(int x, int y) {
     glPushMatrix();
-    glTranslatef(x, -1.f, y);
+    glTranslatef(x + (waterOffset / 2), -1.f, y + (waterOffset / 2));
 
     sf::Texture::bind(&waterTexture);
 

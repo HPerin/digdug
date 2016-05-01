@@ -59,7 +59,10 @@ private:
     GROUND_TYPE ** fieldCopy;
 
     sf::Texture grassTexture;
+
     sf::Texture waterTexture;
+    float waterOffset = 0;
+    int waterDirection = -1;
 };
 
 
