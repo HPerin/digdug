@@ -15,5 +15,5 @@ set(HEADER_FILES
         world.h
         entity.h enemy.cpp enemy.h data.h)
 add_executable(digdug2 ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(digdug2 -lsfml-window -lsfml-system -lsfml-graphics)
+target_link_libraries(digdug2 -lsfml-window -lsfml-system -lsfml-graphics -lsfml-audio)
 target_link_libraries(digdug2 -lGLEW -lGL -lGLU -lm)

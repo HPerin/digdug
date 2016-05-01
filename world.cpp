@@ -13,6 +13,10 @@ World::World() {
     loadTextures();
 }
 
+World::~World() {
+    freeField();
+}
+
 void World::loadTextures() {
     grassTexture.loadFromFile(GRASS_TEXTURE);
     grassTexture.setSmooth(true);
@@ -28,6 +32,15 @@ void World::loadTextures() {
 
     crackTexture.loadFromFile(CRACK_TEXTURE);
     crackTexture.setSmooth(true);
+}
+
+void World::freeField() {
+    for (int x = 0; x < field_width; x++) {
+        free(field[x]);
+        free(fieldCopy[x]);
+    }
+    free(field);
+    free(fieldCopy);
 }
 
 void World::loadField() {
@@ -56,6 +69,7 @@ void World::loadField() {
     }
 
     field[2][2] = HOLE;
+    field[10][15] = HOLE;
 }
 
 void World::event(sf::Event event) {
@@ -430,9 +444,11 @@ void World::fillWater(int x, int y) {
 }
 
 bool World::hasWater(int x, int y) {
-    if (x < 0 || x > field_width) return true;
-    if (y < 0 || y > field_height) return true;
-    return field[x][y] == WATER;
+    return x < 0
+           || x > field_width
+           || y < 0
+           || y > field_height
+           || field[x][y] == WATER;
 }
 
 

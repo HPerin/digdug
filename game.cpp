@@ -4,8 +4,6 @@
 
 #include <iostream>
 #include "game.h"
-#include "player.h"
-#include "world.h"
 #include "data.h"
 
 Game::Game() {

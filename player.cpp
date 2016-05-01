@@ -11,6 +11,16 @@ Player::Player(World * world, sf::Window * window) {
     this->world = world;
     this->window = window;
     current = { -10, 0, -10, 0, 0 };
+
+    loadAudio();
+}
+
+void Player::loadAudio() {
+    footstepSoundBuffer.loadFromFile(FOOTSTEP_SOUND);
+    footstepSound.setBuffer(footstepSoundBuffer);
+
+    fallingSoundBuffer.loadFromFile(FALLING_SOUND);
+    fallingSound.setBuffer(fallingSoundBuffer);
 }
 
 void Player::setCamera() {
@@ -62,13 +72,14 @@ void Player::event(sf::Event event) {
 }
 
 void Player::update(float dt) {
-    if (world->hasWater(getCurrentGridX(), getCurrentGridZ())) {
+    if (!falling && world->hasWater(getCurrentGridX(), getCurrentGridZ())) {
         falling = true;
+        fallingSound.play();
     }
 
     if (falling) {
-        current.y += dt;
-        if (current.y > 0.75)
+        current.y += 0.5f * dt;
+        if (fallingSound.getStatus() != sf::SoundSource::Status::Playing)
             window->close();
         return;
     }
@@ -87,6 +98,12 @@ void Player::update(float dt) {
     if (rightPressed) {
         current.z -= dt * 2 * std::sin(current.roty * PI/180);
         current.x -= dt * 2 * std::cos(current.roty * PI/180);
+    }
+
+    if (upPressed || downPressed || leftPressed || rightPressed) {
+        if (footstepSound.getStatus() != sf::SoundSource::Status::Playing) {
+            footstepSound.play();
+        }
     }
 
     if (xDeltaMouse) {
@@ -130,6 +147,8 @@ int Player::getCurrentGridX() {
 int Player::getCurrentGridZ() {
     return int(-current.z + 1);
 }
+
+
 
 
 

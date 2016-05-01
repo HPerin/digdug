@@ -32,6 +32,7 @@ typedef enum {
 class World : Entity {
 public:
     World();
+    ~World();
 
     void event(sf::Event event);
     void update(float dt);
@@ -48,6 +49,7 @@ private:
     void renderDelimiter(int x, int y);
 
     void loadField();
+    void freeField();
     void loadTextures();
 
     void destroySeparated(int x, int y);
