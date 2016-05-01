@@ -44,8 +44,15 @@ void World::freeField() {
 }
 
 void World::loadField() {
-    field_width = 20;
-    field_height = 20;
+    sf::Image image;
+    if (!image.loadFromFile(MAP_BITMAP)) {
+        std::cerr << "UNABLE TO LOAD MAP!!!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    field_width = image.getSize().x;
+    field_height = image.getSize().y;
+
     field = new GROUND_TYPE*[field_width];
     for (int x = 0; x < field_width; x++) {
         field[x] = new GROUND_TYPE[field_height];
@@ -58,18 +65,14 @@ void World::loadField() {
 
     for (int x = 0; x < field_width; x++) {
         for (int y = 0; y < field_height; y++) {
-            if (x == 0 || x == 19)
-                field[x][y] = WATER;
-            else if (y == 0 || y == 19) {
-                field[x][y] = WATER;
-            } else {
+            sf::Color color = image.getPixel((unsigned int) x, (unsigned int) y);
+            if (color.g == 255) {
                 field[x][y] = TERRAIN;
+            } else if (color.r == 255) {
+                field[x][y] = HOLE;
             }
         }
     }
-
-    field[2][2] = HOLE;
-    field[10][15] = HOLE;
 }
 
 void World::event(sf::Event event) {

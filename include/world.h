@@ -14,6 +14,8 @@
 #define HOLE_TEXTURE  "resource/hole.jpg"
 #define CRACK_TEXTURE "resource/crack.jpg"
 
+#define MAP_BITMAP    "resource/map.png"
+
 typedef enum {
     WATER,
     TERRAIN,
