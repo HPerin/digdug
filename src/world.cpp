@@ -50,8 +50,8 @@ void World::loadField() {
         exit(EXIT_FAILURE);
     }
 
-    field_width = image.getSize().x;
-    field_height = image.getSize().y;
+    field_width = image.getSize().x + 2;
+    field_height = image.getSize().y + 2;
 
     field = new GROUND_TYPE*[field_width];
     for (int x = 0; x < field_width; x++) {
@@ -65,11 +65,15 @@ void World::loadField() {
 
     for (int x = 0; x < field_width; x++) {
         for (int y = 0; y < field_height; y++) {
-            sf::Color color = image.getPixel((unsigned int) x, (unsigned int) y);
-            if (color.g == 255) {
-                field[x][y] = TERRAIN;
-            } else if (color.r == 255) {
-                field[x][y] = HOLE;
+            if (x == 0 || x == (field_width - 1) || y == 0 || y == (field_height - 1))
+                field[x][y] = WATER;
+            else {
+                sf::Color color = image.getPixel((unsigned int) x - 1, (unsigned int) y - 1);
+                if (color.g == 255) {
+                    field[x][y] = TERRAIN;
+                } else if (color.r == 255) {
+                    field[x][y] = HOLE;
+                }
             }
         }
     }
