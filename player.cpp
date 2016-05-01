@@ -50,7 +50,7 @@ void Player::event(sf::Event event) {
         case sf::Event::MouseMoved: {
             unsigned int xMiddle = window->getSize().x / 2;
             unsigned int yMiddle = window->getSize().y / 2;
-            if (event.mouseMove.x != xMiddle || event.mouseMove.y != yMiddle) {
+            if (event.mouseMove.x != int(xMiddle) || event.mouseMove.y != int(yMiddle)) {
                 xDeltaMouse = event.mouseMove.x - xMiddle;
                 yDeltaMouse = event.mouseMove.y - yMiddle;
                 sf::Mouse::setPosition(sf::Vector2i(xMiddle, yMiddle), *window);

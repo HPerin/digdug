@@ -9,6 +9,17 @@
 
 World::World() {
     loadField();
+
+    loadTextures();
+}
+
+void World::loadTextures() {
+    if (!grassTexture.loadFromFile(GRASS_TEXTURE))
+        exit(EXIT_FAILURE);
+    grassTexture.setSmooth(true);
+    if (!waterTexture.loadFromFile(WATER_TEXTURE))
+        exit(EXIT_FAILURE);
+    waterTexture.setSmooth(true);
 }
 
 void World::loadField() {
@@ -48,13 +59,18 @@ void World::update(float dt) {
 }
 
 void World::render() {
-    renderWater();
+    for (int x = -30; x < 30; x++) {
+        for (int y = -30; y < 30; y++) {
+            renderWater(x, y);
+        }
+    }
 
     for (int x = 0; x < 20; x++) {
         for (int y = 0; y < 20; y++) {
             switch (field[x][y]) {
                 case WATER: break;
-                case TERRAIN: renderGround(x, y); break;
+                case TERRAIN:
+                    renderGrass(x, y); break;
                 case STONE:break;
                 case CRACK: renderCrack(x, y); break;
                 case HOLE: renderHole(x, y); break;
@@ -65,37 +81,59 @@ void World::render() {
     }
 }
 
-void World::renderWater() {
+void World::renderWater(int x, int y) {
     glPushMatrix();
-    glTranslatef(0.f, -0.51f, 0.f);
-    glScalef    (100.f, 1.f,100.f);
+    glTranslatef(x, -1.f, y);
+
+    sf::Texture::bind(&waterTexture);
 
     glBegin(GL_QUADS);
     glColor3f   ( 0.f, 0.f, 1.f);
 
+    glTexCoord2f( 1.f,      1.f);
     glVertex3f  ( 1.f, 0.f, 1.f);
+
+    glTexCoord2f( 0.f,      1.f);
     glVertex3f  (-1.f, 0.f, 1.f);
+
+    glTexCoord2f( 0.f,      0.f);
     glVertex3f  (-1.f, 0.f,-1.f);
+
+    glTexCoord2f( 1.f,      0.f);
     glVertex3f  ( 1.f, 0.f,-1.f);
     glEnd();
+
+    sf::Texture::bind(NULL);
 
     glPopMatrix();
 }
 
-void World::renderGround(int x, int y) {
+void World::renderGrass(int x, int y) {
     glPushMatrix();
     glTranslatef(  x, -0.5f,   y);
+
+    sf::Texture::bind(&grassTexture);
 
     /*
      * Draw this positions floor
      */
     glBegin(GL_QUADS);
     glColor3f   ( 0.f, 1.f, 0.f);
+
+    glTexCoord2f( 1.f,      1.f);
     glVertex3f  ( 1.f, 0.f, 1.f);
+
+    glTexCoord2f( 0.f,      1.f);
     glVertex3f  (-1.f, 0.f, 1.f);
+
+    glTexCoord2f( 0.f,      0.f);
     glVertex3f  (-1.f, 0.f,-1.f);
+
+    glTexCoord2f( 1.f,      0.f);
     glVertex3f  ( 1.f, 0.f,-1.f);
     glEnd();
+
+    sf::Texture::bind(NULL);
 
     glPopMatrix();
 }
@@ -301,6 +339,8 @@ void World::fillWater(int x, int y) {
         fillWater(x, y+1);
     }
 }
+
+
 
 
 

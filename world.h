@@ -5,7 +5,11 @@
 #ifndef DIGDUG2_WORLD_H
 #define DIGDUG2_WORLD_H
 
+#include <SFML/Graphics.hpp>
 #include "entity.h"
+
+#define GRASS_TEXTURE "resource/grass.jpg"
+#define WATER_TEXTURE "resource/water.jpg"
 
 typedef enum {
     WATER,
@@ -33,13 +37,14 @@ public:
     void generateCrack(int ax, int ay, DIRECTION direction);
 
 private:
-    void renderWater ();
-    void renderGround(int x, int y);
+    void renderWater (int x, int y);
+    void renderGrass(int x, int y);
     void renderHole  (int x, int y);
     void renderCrack (int x, int y);
     void renderDelimiter(int x, int y);
 
     void loadField();
+    void loadTextures();
 
     void destroySeparated(int x, int y);
     bool checkSeparated(int x, int y, DIRECTION * direction);
@@ -52,6 +57,9 @@ private:
     int field_height;
     GROUND_TYPE ** field;
     GROUND_TYPE ** fieldCopy;
+
+    sf::Texture grassTexture;
+    sf::Texture waterTexture;
 };
 
 
