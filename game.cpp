@@ -9,7 +9,11 @@
 #include "data.h"
 
 Game::Game() {
-    window = new sf::Window(sf::VideoMode(800, 800), "DIG DUG II");
+    sf::ContextSettings settings;
+    settings.antialiasingLevel = 2;
+    settings.depthBits = 24;
+
+    window = new sf::Window(sf::VideoMode(800, 600), "DIG DUG II", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(1);
     window->setMouseCursorVisible(false);
 
@@ -45,7 +49,7 @@ void Game::windowReshape() {
 
     glMatrixMode    (GL_PROJECTION);
     glLoadIdentity  ();
-    setPerspective  (45, (float)window->getSize().x/(float)window->getSize().y, 0.1f, 100.f);
+    setPerspective  (45, float(window->getSize().x)/float(window->getSize().y), 0.1f, 1000.f);
 
     glMatrixMode    (GL_MODELVIEW);
     glLoadIdentity  ();
@@ -79,6 +83,7 @@ void Game::stepRender() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glScalef(10.f, 10.f, 10.f);
 
     player->setCamera();
     for (Entity * entity : entities) {

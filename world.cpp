@@ -14,13 +14,20 @@ World::World() {
 }
 
 void World::loadTextures() {
-    if (!grassTexture.loadFromFile(GRASS_TEXTURE))
-        exit(EXIT_FAILURE);
+    grassTexture.loadFromFile(GRASS_TEXTURE);
     grassTexture.setSmooth(true);
 
-    if (!waterTexture.loadFromFile(WATER_TEXTURE))
-        exit(EXIT_FAILURE);
+    waterTexture.loadFromFile(WATER_TEXTURE);
     waterTexture.setSmooth(true);
+
+    baseTexture.loadFromFile(BASE_TEXTURE);
+    baseTexture.setSmooth(true);
+
+    holeTexture.loadFromFile(HOLE_TEXTURE);
+    holeTexture.setSmooth(true);
+
+    crackTexture.loadFromFile(CRACK_TEXTURE);
+    crackTexture.setSmooth(true);
 }
 
 void World::loadField() {
@@ -56,12 +63,8 @@ void World::event(sf::Event event) {
 }
 
 void World::update(float dt) {
-    if (waterDirection == -1 && waterOffset < -1)
-        waterDirection = 1;
-    else if (waterDirection == 1 && waterOffset > 1)
-        waterDirection = 1;
-
-    waterOffset += dt * waterDirection;
+    waterOffset += dt;
+    while(waterOffset > 1) waterOffset -= 1;
 }
 
 void World::render() {
@@ -73,23 +76,24 @@ void World::render() {
 
     for (int x = 0; x < 20; x++) {
         for (int y = 0; y < 20; y++) {
-            switch (field[x][y]) {
-                case WATER: break;
-                case TERRAIN:
-                    renderGrass(x, y); break;
-                case STONE:break;
-                case CRACK: renderCrack(x, y); break;
-                case HOLE: renderHole(x, y); break;
+            if (field[x][y] != WATER) {
+                renderGrass(x - 1, y - 1);
+                switch (field[x][y]) {
+                    case STONE: break;
+                    case CRACK: renderCrack(x - 1, y - 1); break;
+                    case HOLE: renderHole(x - 1, y - 1); break;
+                    default: break;
+                }
             }
 
-            renderDelimiter(x, y);
+            //renderDelimiter(x-1, y-1);
         }
     }
 }
 
 void World::renderWater(int x, int y) {
     glPushMatrix();
-    glTranslatef(x + (waterOffset / 2), -1.f, y + (waterOffset / 2));
+    glTranslatef(x, -1.f, y + waterOffset);
 
     sf::Texture::bind(&waterTexture);
 
@@ -100,13 +104,13 @@ void World::renderWater(int x, int y) {
     glVertex3f  ( 1.f, 0.f, 1.f);
 
     glTexCoord2f( 0.f,      1.f);
-    glVertex3f  (-1.f, 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
 
     glTexCoord2f( 0.f,      0.f);
-    glVertex3f  (-1.f, 0.f,-1.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
 
     glTexCoord2f( 1.f,      0.f);
-    glVertex3f  ( 1.f, 0.f,-1.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
     glEnd();
 
     sf::Texture::bind(NULL);
@@ -115,6 +119,8 @@ void World::renderWater(int x, int y) {
 }
 
 void World::renderGrass(int x, int y) {
+    renderBase(x, y);
+
     glPushMatrix();
     glTranslatef(  x, -0.5f,   y);
 
@@ -130,13 +136,13 @@ void World::renderGrass(int x, int y) {
     glVertex3f  ( 1.f, 0.f, 1.f);
 
     glTexCoord2f( 0.f,      1.f);
-    glVertex3f  (-1.f, 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
 
     glTexCoord2f( 0.f,      0.f);
-    glVertex3f  (-1.f, 0.f,-1.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
 
     glTexCoord2f( 1.f,      0.f);
-    glVertex3f  ( 1.f, 0.f,-1.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
     glEnd();
 
     sf::Texture::bind(NULL);
@@ -146,51 +152,117 @@ void World::renderGrass(int x, int y) {
 
 void World::renderHole(int x, int y) {
     glPushMatrix();
-    glTranslatef(  x, -0.5f,   y);
+    glTranslatef(  x, -0.49f,   y);
 
-    /*
-     * Draw this positions floor
-     */
+    sf::Texture::bind(&holeTexture);
+
     glBegin(GL_QUADS);
     glColor3f   (0.41,0.25,0.14);
+
+    glTexCoord2f( 1.f,      1.f);
     glVertex3f  ( 1.f, 0.f, 1.f);
-    glVertex3f  (-1.f, 0.f, 1.f);
-    glVertex3f  (-1.f, 0.f,-1.f);
-    glVertex3f  ( 1.f, 0.f,-1.f);
+    glTexCoord2f( 0.f,      1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glTexCoord2f( 0.f,      0.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glTexCoord2f( 1.f,      0.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
     glEnd();
+
+    sf::Texture::bind(NULL);
 
     glPopMatrix();
 }
 
 void World::renderCrack(int x, int y) {
     glPushMatrix();
-    glTranslatef(  x, -0.5f,   y);
+    glTranslatef(  x, -0.49f,   y);
+
+    sf::Texture::bind(&crackTexture);
 
     /*
      * Draw this positions floor
      */
     glBegin(GL_QUADS);
     glColor3f   (0.55,0.41,0.13);
+
+    glTexCoord2f( 1.f,      1.f);
     glVertex3f  ( 1.f, 0.f, 1.f);
-    glVertex3f  (-1.f, 0.f, 1.f);
-    glVertex3f  (-1.f, 0.f,-1.f);
-    glVertex3f  ( 1.f, 0.f,-1.f);
+    glTexCoord2f( 0.f,      1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glTexCoord2f( 0.f,      0.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glTexCoord2f( 1.f,      0.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
     glEnd();
+
+    sf::Texture::bind(NULL);
 
     glPopMatrix();
 }
 
 void World::renderDelimiter(int x, int y) {
     glPushMatrix();
-    glTranslatef(  x, -0.5f,   y);
+    glTranslatef(  x, -0.49f,   y);
 
     glBegin(GL_LINE_LOOP);
     glColor3f   ( 0.3f, 0.3f, 0.3f);
     glVertex3f  ( 1.f, 0.f, 1.f);
-    glVertex3f  (-1.f, 0.f, 1.f);
-    glVertex3f  (-1.f, 0.f,-1.f);
-    glVertex3f  ( 1.f, 0.f,-1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
     glEnd();
+
+    glPopMatrix();
+}
+
+void World::renderBase(int x, int y) {
+    glPushMatrix();
+    glTranslatef(x, -0.5f, y);
+
+    sf::Texture::bind(&baseTexture);
+
+    glBegin(GL_QUADS);
+    glColor3f   (0.55,0.41,0.13);
+
+    glTexCoord2f(      1.f, 0.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glTexCoord2f(      1.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glTexCoord2f(      0.f, 1.f);
+    glVertex3f  ( 0.f,-1.f, 1.f);
+    glTexCoord2f(      0.f, 0.f);
+    glVertex3f  ( 0.f,-1.f, 0.f);
+
+    glTexCoord2f(      1.f, 1.f);
+    glVertex3f  ( 1.f, 0.f, 1.f);
+    glTexCoord2f(      1.f, 0.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
+    glTexCoord2f(      0.f, 0.f);
+    glVertex3f  ( 1.f,-1.f, 0.f);
+    glTexCoord2f(      0.f, 1.f);
+    glVertex3f  ( 1.f,-1.f, 1.f);
+
+    glTexCoord2f( 1.f, 1.f);
+    glVertex3f  ( 1.f, 0.f, 1.f);
+    glTexCoord2f( 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glTexCoord2f( 0.f, 0.f);
+    glVertex3f  ( 0.f,-1.f, 1.f);
+    glTexCoord2f( 1.f, 0.f);
+    glVertex3f  ( 1.f,-1.f, 1.f);
+
+    glTexCoord2f( 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glTexCoord2f( 1.f, 1.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
+    glTexCoord2f( 1.f, 0.f);
+    glVertex3f  ( 1.f,-1.f, 0.f);
+    glTexCoord2f( 0.f, 0.f);
+    glVertex3f  ( 0.f,-1.f, 0.f);
+    glEnd();
+
+    sf::Texture::bind(NULL);
 
     glPopMatrix();
 }
@@ -251,15 +323,26 @@ void World::destroySeparated(int x, int y) {
     }
 
     int x2 = 0, y2 = 0;
-    switch (direction[0]) {
+    switch (direction[1]) {
         case LEFT: x2 = x - 1; y2 = y + 1; break;
         case RIGHT: x2 = x + 1; y2 = y - 1; break;
         case UP: x2 = x + 1; y2 = y + 1; break;
         case DOWN: x2 = x - 1; y2 = y - 1; break;
     }
 
-    std::memcpy(fieldCopy, field, sizeof(20 * 20 * sizeof(DIRECTION)));
-    if (fillAlgorithm(x1, y1) > fillAlgorithm(x2, y2)) {
+    for (int xi = 0; xi < field_width; xi++) {
+        for (int yi = 0; yi <  field_height; yi++) {
+            fieldCopy[xi][yi] = field[xi][yi];
+        }
+    }
+    int field1 = fillAlgorithm(x1, y1);
+    for (int xi = 0; xi < field_width; xi++) {
+        for (int yi = 0; yi <  field_height; yi++) {
+            fieldCopy[xi][yi] = field[xi][yi];
+        }
+    }
+    int field2 = fillAlgorithm(x2, y2);
+    if (field1 > field2) {
         fillWater(x2, y2);
     } else {
         fillWater(x1, y1);
@@ -269,21 +352,21 @@ void World::destroySeparated(int x, int y) {
 bool World::checkSeparated(int x, int y, DIRECTION * direction) {
     int cur_dir = 0;
 
-    if (arrivesWater(x, y, LEFT)) {
-        cur_dir++;
+    if (arrivesWater(x, y, LEFT) && field[x-1][y+1] == TERRAIN) {
         direction[cur_dir] = LEFT;
-    }
-    if (arrivesWater(x, y, RIGHT)) {
         cur_dir++;
+    }
+    if (arrivesWater(x, y, RIGHT) && field[x+1][y-1] == TERRAIN) {
         direction[cur_dir] = RIGHT;
-    }
-    if (arrivesWater(x, y, UP)) {
         cur_dir++;
+    }
+    if (arrivesWater(x, y, UP) && field[x+1][y+1] == TERRAIN) {
         direction[cur_dir] = UP;
-    }
-    if (arrivesWater(x, y, DOWN)) {
         cur_dir++;
+    }
+    if (arrivesWater(x, y, DOWN) && field[x-1][y-1] == TERRAIN) {
         direction[cur_dir] = DOWN;
+        cur_dir++;
     }
 
     return cur_dir >= 2;

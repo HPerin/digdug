@@ -10,6 +10,9 @@
 
 #define GRASS_TEXTURE "resource/grass.jpg"
 #define WATER_TEXTURE "resource/water.jpg"
+#define BASE_TEXTURE  "resource/base.jpg"
+#define HOLE_TEXTURE  "resource/hole.jpg"
+#define CRACK_TEXTURE "resource/crack.jpg"
 
 typedef enum {
     WATER,
@@ -60,10 +63,13 @@ private:
     GROUND_TYPE ** fieldCopy;
 
     sf::Texture grassTexture;
-
+    sf::Texture baseTexture;
+    sf::Texture holeTexture;
+    sf::Texture crackTexture;
     sf::Texture waterTexture;
     float waterOffset = 0;
-    int waterDirection = -1;
+
+    void renderBase(int x, int y);
 };
 
 
