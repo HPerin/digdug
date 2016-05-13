@@ -5,6 +5,7 @@
 #ifndef DIGDUG2_WORLD_H
 #define DIGDUG2_WORLD_H
 
+#include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
 #include "entity.h"
 
@@ -14,22 +15,22 @@
 #define HOLE_TEXTURE  "resource/hole.jpg"
 #define CRACK_TEXTURE "resource/crack.jpg"
 
-#define MAP_BITMAP    "resource/map.png"
+#define MAP_BITMAP    "resource/map2.png"
 
 typedef enum {
-    WATER,
-    TERRAIN,
-    STONE,
-    CRACK,
-    HOLE
-} GROUND_TYPE;
+    Water,
+    Terrain,
+    Stone,
+    Crack,
+    Hole
+} GroundType;
 
 typedef enum {
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN
-} DIRECTION;
+    Left,
+    Right,
+    Up,
+    Down
+} Direction;
 
 class World : Entity {
 public:
@@ -40,7 +41,7 @@ public:
     void update(float dt);
     void render();
 
-    void generateCrack(int ax, int ay, DIRECTION direction);
+    void generateCrack(int ax, int ay, Direction direction);
     bool hasWater(int x, int y);
 
 private:
@@ -54,17 +55,17 @@ private:
     void freeField();
     void loadTextures();
 
-    void destroySeparated(int x, int y);
-    bool checkSeparated(int x, int y, DIRECTION * direction);
-    bool arrivesWater(int x, int y, DIRECTION direction);
+    void destroySeparated();
+    bool checkSeparated(int x, int y, int x2, int y2);
+    bool arrivesWater(int x, int y, Direction direction);
 
     int fillAlgorithm(int x, int y);
     void fillWater(int x, int y);
 
     int field_width;
     int field_height;
-    GROUND_TYPE ** field;
-    GROUND_TYPE ** fieldCopy;
+    GroundType ** field;
+    GroundType ** fieldCopy;
 
     sf::Texture grassTexture;
     sf::Texture baseTexture;
@@ -74,6 +75,8 @@ private:
     float waterOffset = 0;
 
     void renderBase(int x, int y);
+
+    void fillPointsAlgorithm(int x, int y, std::set<int> * xSet, std::set<int> * ySet);
 };
 
 

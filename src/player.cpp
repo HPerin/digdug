@@ -127,15 +127,15 @@ void Player::render() {
 void Player::generateCrack() {
     current.roty = int(current.roty) % 360;
     while (current.roty < 0) current.roty += 360;
-    DIRECTION direction;
+    Direction direction;
     if (current.roty < 45 || current.roty >= 315) {
-        direction = DOWN;
+        direction = Down;
     } else if (current.roty < 135) {
-        direction = RIGHT;
+        direction = Right;
     } else if (current.roty < 225) {
-        direction = UP;
+        direction = Up;
     } else {
-        direction = LEFT;
+        direction = Left;
     }
     world->generateCrack(getCurrentGridX(), getCurrentGridZ(), direction);
 }

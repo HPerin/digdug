@@ -3,12 +3,13 @@
 //
 
 #include <iostream>
+#include <enemy.h>
 #include "game.h"
 #include "data.h"
 
 Game::Game() {
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 2;
+    settings.antialiasingLevel = 4;
     settings.depthBits = 24;
 
     window = new sf::Window(sf::VideoMode(800, 600), "DIG DUG II", sf::Style::Default, settings);
@@ -28,6 +29,7 @@ Game::Game() {
 
     entities.push_back((Entity *const &) player);
     entities.push_back((Entity *const &) world);
+    entities.push_back((Entity *const &) new Enemy());
 }
 
 Game::~Game() {
