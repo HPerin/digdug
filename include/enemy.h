@@ -8,17 +8,28 @@
 #include <SFML/Graphics.hpp>
 #include <GL/gl.h>
 #include "entity.h"
+#include "world.h"
 
 class Enemy : Entity {
 public:
-    Enemy();
+    Enemy(int x, int y, World * world);
 
     void event(sf::Event event);
     void update(float dt);
     void render();
 
-private:
+    void tryFollow(int x, int y);
 
+
+    sf::Vector2f position;
+
+private:
+    sf::Vector2i target;
+
+    World * world;
+
+    void die();
+    bool dead;
 };
 
 

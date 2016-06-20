@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(digdug2)
+set(EXECUTABLE_NAME digdug2)
+project(${EXECUTABLE_NAME})
 include_directories(include)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 set(SOURCE_FILES
@@ -17,7 +18,16 @@ set(HEADER_FILES
         include/entity.h
         include/enemy.h
         include/data.h)
-add_executable(digdug2 ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(digdug2 sfml-window sfml-system sfml-graphics sfml-audio)
-target_link_libraries(digdug2 GLEW GL GLU)
-target_link_libraries(digdug2 m)
+add_executable(${EXECUTABLE_NAME} ${SOURCE_FILES} ${HEADER_FILES})
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
+set(SFML_ROOT "${CMAKE_SOURCE_DIR}/lib/SFML")
+find_package(SFML 2 COMPONENTS system window graphics audio network REQUIRED)
+include_directories(${SFML_INCLUDE_DIR})
+target_link_libraries(${EXECUTABLE_NAME} ${SFML_LIBRARIES})
+
+find_package(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR})
+target_link_libraries(${EXECUTABLE_NAME} ${OPENGL_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME} m)
+

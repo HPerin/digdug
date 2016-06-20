@@ -27,6 +27,7 @@ private:
     sf::Clock clock;
 
     Player * player;
+    World * world;
     std::vector<Entity *> entities;
 
     void stepUpdates();

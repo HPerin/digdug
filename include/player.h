@@ -9,6 +9,7 @@
 #include <SFML/Window.hpp>
 #include "entity.h"
 #include "world.h"
+#include "enemy.h"
 
 #define FOOTSTEP_SOUND "resource/footstep.wav"
 #define FALLING_SOUND  "resource/falling.wav"
@@ -41,6 +42,8 @@ private:
     bool rightPressed = false;
     bool upPressed = false;
     bool downPressed = false;
+    bool rotLeftPressed = false;
+    bool rotRightPressed = false;
     bool falling = false;
 
     int xDeltaMouse = 0;

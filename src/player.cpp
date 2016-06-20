@@ -4,6 +4,7 @@
 
 #include <SFML/OpenGL.hpp>
 #include <iostream>
+#include <player.h>
 #include "player.h"
 #include "data.h"
 
@@ -33,28 +34,24 @@ void Player::event(sf::Event event) {
     switch (event.type) {
         case sf::Event::KeyPressed: {
             switch (event.key.code) {
-                case sf::Keyboard::W:
-                case sf::Keyboard::Up: upPressed = true; break;
-                case sf::Keyboard::A:
-                case sf::Keyboard::Left: leftPressed = true; break;
-                case sf::Keyboard::D:
-                case sf::Keyboard::Right: rightPressed = true; break;
-                case sf::Keyboard::S:
-                case sf::Keyboard::Down: downPressed = true; break;
+                case sf::Keyboard::W: upPressed = true; break;
+                case sf::Keyboard::A: leftPressed = true; break;
+                case sf::Keyboard::D: rightPressed = true; break;
+                case sf::Keyboard::S: downPressed = true; break;
+                case sf::Keyboard::Left: rotLeftPressed = true; break;
+                case sf::Keyboard::Right: rotRightPressed = true; break;
                 case sf::Keyboard::Space: generateCrack(); break;
                 default: break;
             }
         } break;
         case sf::Event::KeyReleased: {
             switch (event.key.code) {
-                case sf::Keyboard::W:
-                case sf::Keyboard::Up: upPressed = false; break;
-                case sf::Keyboard::A:
-                case sf::Keyboard::Left: leftPressed = false; break;
-                case sf::Keyboard::D:
-                case sf::Keyboard::Right: rightPressed = false; break;
-                case sf::Keyboard::S:
-                case sf::Keyboard::Down: downPressed = false; break;
+                case sf::Keyboard::W: upPressed = false; break;
+                case sf::Keyboard::A: leftPressed = false; break;
+                case sf::Keyboard::D: rightPressed = false; break;
+                case sf::Keyboard::S: downPressed = false; break;
+                case sf::Keyboard::Left: rotLeftPressed = false; break;
+                case sf::Keyboard::Right: rotRightPressed = false; break;
                 default: break;
             }
         } break;
@@ -84,6 +81,22 @@ void Player::update(float dt) {
         return;
     }
 
+    for (Entity * entity : world->enemyList) {
+        Enemy * enemy = (Enemy*) entity;
+        if (round(enemy->position.x+1) == std::abs(round(current.x)) &&
+            round(enemy->position.y+1) == std::abs(round(current.z))) {
+            falling = true;
+            fallingSound.play();
+        }
+
+        int dist_x = (int) std::abs(round(enemy->position.x + 1) - std::abs(round(current.x)));
+        int dist_y = (int) std::abs(round(enemy->position.y + 1) - std::abs(round(current.z)));
+        int dist = (int) sqrt(dist_x * dist_x + dist_y + dist_y);
+        if (dist < 5) {
+            enemy->tryFollow((int) (std::abs(round(current.x)) - 1), (int) (std::abs(round(current.z))) - 1);
+        }
+    }
+
     if (upPressed) {
         current.z += dt * 2 * std::cos(current.roty * PI/180);
         current.x -= dt * 2 * std::sin(current.roty * PI/180);
@@ -104,6 +117,14 @@ void Player::update(float dt) {
         if (footstepSound.getStatus() != sf::SoundSource::Status::Playing) {
             footstepSound.play();
         }
+    }
+
+    if (rotLeftPressed) {
+        current.rotx = 10;
+        current.roty -= 180 * dt;
+    } else if (rotRightPressed) {
+        current.rotx = 10;
+        current.roty += 180 * dt;
     }
 
     if (xDeltaMouse) {

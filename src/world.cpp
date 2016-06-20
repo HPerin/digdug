@@ -7,6 +7,7 @@
 #include <vector>
 #include <set>
 #include "world.h"
+#include "enemy.h"
 
 World::World() {
     loadField();
@@ -71,8 +72,11 @@ void World::loadField() {
                 sf::Color color = image.getPixel((unsigned int) x - 1, (unsigned int) y - 1);
                 if (color.g == 255) {
                     field[x][y] = Terrain;
-                } else if (color.r == 255) {
+                } else if (color.r == 255 && color.b == 255) {
                     field[x][y] = Hole;
+                } else if (color.r == 255) {
+                    field[x][y] = Terrain;
+                    enemyList.push_back((Entity*) new Enemy(x, y, this));
                 }
             }
         }
@@ -326,81 +330,83 @@ void World::generateCrack(int x, int y, Direction direction) {
         } break;
     }
 
-    destroySeparated();
+    while (destroySeparated());
 }
 
-void World::destroySeparated() {
-    for (int x1 = 0; x1 < field_width; x1++) {
-        for (int x2 = 0; x2 < field_width; x2++) {
-            for (int y1 = 0; y1 < field_width; y1++) {
-                for (int y2 = 0; y2 < field_width; y2++) {
-                    if (checkSeparated(x1, y1, x2, y2)) {
+void World::fillBool(bool ** bool_field, int x, int y) {
+    if (field[x][y] == Terrain && !bool_field[x][y]) {
+        bool_field[x][y] = true;
+        fillBool(bool_field, x+1, y);
+        fillBool(bool_field, x-1, y);
+        fillBool(bool_field, x, y-1);
+        fillBool(bool_field, x, y+1);
+    }
+}
 
-                    }
-                }
+int World::fillSize(bool ** bool_field, int x, int y) {
+    if (field[x][y] == Terrain && !bool_field[x][y]) {
+        bool_field[x][y] = true;
+        return 1 +
+               fillSize(bool_field, x+1, y) +
+               fillSize(bool_field, x-1, y) +
+               fillSize(bool_field, x, y+1) +
+               fillSize(bool_field, x, y-1);
+    }
+    return 0;
+}
+
+bool World::destroySeparated() {
+    int found_x=-1, found_y=-1;
+    for (int x = 0; x < field_width; x++) {
+        for (int y = 0; y < field_height; y++) {
+            if (field[x][y] == GroundType::Terrain) {
+                if (found_x == -1) found_x = x;
+                if (found_y == -1) found_y = y;
             }
         }
     }
-}
 
-bool World::checkSeparated(int x1, int y1, int x2, int y2) {
-    std::set<int> x1Set;
-    std::set<int> x2Set;
-    std::set<int> y1Set;
-    std::set<int> y2Set;
+    bool ** bool_field = new bool*[field_width];
+    for (int x = 0; x < field_width; x++) bool_field[x] = new bool[field_height];
+    initFalse(bool_field);
+    fillBool(bool_field, found_x, found_y);
 
-    fillPointsAlgorithm(x1, y2, &x1Set, &y1Set);
-}
-
-void World::fillPointsAlgorithm(int x, int y, std::set<int> * xSet, std::set<int> * ySet) {
-
-}
-
-bool World::arrivesWater(int x, int y, Direction direction) {
-    int ax = x;
-    int ay = y;
-
-    switch (direction) {
-        case Left: {
-            ax--;
-            while(field[ax][ay] == Crack) {
-                ax--;
+    bool is_separated = false;
+    int separated_x = -1, separated_y = -1;
+    for (int x = 0; x < field_width; x++) {
+        for (int y = 0; y < field_height; y++) {
+            if (field[x][y] == GroundType::Terrain && !bool_field[x][y]) {
+                is_separated = true;
+                separated_x = x;
+                separated_y = y;
             }
-        } break;
-        case Right: {
-            ax++;
-            while(field[ax][ay] == Crack) {
-                ax++;
-            }
-        } break;
-        case Up: {
-            ay++;
-            while(field[ax][ay] == Crack) {
-                ay++;
-            }
-        } break;
-        case Down: {
-            ay--;
-            while(field[ax][ay] == Crack) {
-                ay--;
-            }
-        } break;
+        }
     }
 
-    return field[ax][ay] == Water;
-}
+    if (is_separated) {
+        bool ** first_bool_field = new bool*[field_width];
+        for (int x = 0; x < field_width; x++) first_bool_field[x] = new bool[field_height];
+        initFalse(first_bool_field);
+        int first_size = fillSize(first_bool_field, found_x, found_y);
 
-int World::fillAlgorithm(int x, int y) {
-    if (fieldCopy[x][y] == Terrain) {
-        fieldCopy[x][y] = Water;
-        return fillAlgorithm(x+1, y) +
-               fillAlgorithm(x-1, y) +
-               fillAlgorithm(x, y-1) +
-               fillAlgorithm(x, y+1) +
-               1;
+        bool ** second_bool_field = new bool*[field_width];
+        for (int x = 0; x < field_width; x++) second_bool_field[x] = new bool[field_height];
+        initFalse(second_bool_field);
+        int second_size = fillSize(second_bool_field, separated_x, separated_y);
+
+        if (first_size < second_size) fillWater(found_x, found_y);
+        else fillWater(separated_x, separated_y);
+
+        for (int x = 0; x < field_width; x++) free(first_bool_field[x]);
+        free(first_bool_field);
+        for (int x = 0; x < field_width; x++) free(second_bool_field[x]);
+        free(second_bool_field);
     }
 
-    return 0;
+    for (int x = 0; x < field_width; x++) free(bool_field[x]);
+    free(bool_field);
+
+    return is_separated;
 }
 
 void World::fillWater(int x, int y) {
@@ -419,6 +425,20 @@ bool World::hasWater(int x, int y) {
            || y < 0
            || y > field_height
            || field[x][y] == Water;
+}
+
+void World::initFalse(bool ** bool_field) {
+    for (int x = 0; x < field_width; x++) {
+        for (int y = 0; y < field_height; y++) {
+            bool_field[x][y] = false;
+        }
+    }
+}
+
+bool World::hasTerrain(int x, int y) {
+    if (x < 0 || x > field_width) return false;
+    if (y < 0 || y > field_height) return false;
+    return field[x][y] == GroundType::Terrain;
 }
 
 

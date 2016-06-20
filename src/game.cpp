@@ -12,8 +12,9 @@ Game::Game() {
     settings.antialiasingLevel = 4;
     settings.depthBits = 24;
 
-    window = new sf::Window(sf::VideoMode(800, 600), "DIG DUG II", sf::Style::Default, settings);
-    window->setVerticalSyncEnabled(1);
+    window = new sf::Window(sf::VideoMode(1600, 900), "DIG DUG II", sf::Style::Default, settings);
+    window->setVerticalSyncEnabled(false);
+    window->setFramerateLimit(0);
     window->setMouseCursorVisible(false);
 
     windowReshape();
@@ -24,12 +25,11 @@ Game::Game() {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClearDepth(1.0f);
 
-    World * world = new World();
+    world = new World();
     player = new Player(world, window);
 
     entities.push_back((Entity *const &) player);
     entities.push_back((Entity *const &) world);
-    entities.push_back((Entity *const &) new Enemy());
 }
 
 Game::~Game() {
@@ -75,6 +75,9 @@ void Game::stepEvents() {
         for (Entity * entity : entities) {
             entity->event(event);
         }
+        for (Entity * entity : world->enemyList) {
+            entity->event(event);
+        }
     }
 }
 
@@ -87,6 +90,9 @@ void Game::stepRender() {
 
     player->setCamera();
     for (Entity * entity : entities) {
+        entity->render();
+    }
+    for (Entity * entity : world->enemyList) {
         entity->render();
     }
 
@@ -107,6 +113,9 @@ void Game::stepUpdates() {
     clock.restart();
 
     for (Entity * entity : entities) {
+        entity->update(elapsed.asSeconds());
+    }
+    for (Entity * entity : world->enemyList) {
         entity->update(elapsed.asSeconds());
     }
 }
