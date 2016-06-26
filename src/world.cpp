@@ -9,6 +9,28 @@
 #include "world.h"
 #include "enemy.h"
 
+bool C3DObject_Load_New_World(const char *pszFilename, GLMmodel **model) {
+    char aszFilename[256];
+    strcpy(aszFilename, pszFilename);
+
+    if (*model) {
+
+        free(*model);
+        *model = NULL;
+    }
+
+    *model = glmReadOBJ(aszFilename);
+    if (!(*model))
+        return false;
+
+    glmUnitize(*model);
+    //glmScale(model,sFactor); // USED TO SCALE THE OBJECT
+    glmFacetNormals(*model);
+    glmVertexNormals(*model, 90.0);
+
+    return true;
+}
+
 World::World() {
     loadField();
 
@@ -70,7 +92,13 @@ void World::loadField() {
             field[x][y] = Water;
             if (!(x == 0 || x == (field_width - 1) || y == 0 || y == (field_height - 1))) {
                 sf::Color color = image.getPixel((unsigned int) x - 1, (unsigned int) y - 1);
-                if (color.r == 255 && color.g == 255) {
+                if (color.r == 127) {
+                    initialPlayerPosition.x = x;
+                    initialPlayerPosition.y = y;
+                    field[x][y] = Terrain;
+                } else if (color.g == 127) {
+                    field[x][y] = Crack;
+                } else if (color.r == 255 && color.g == 255) {
                     field[x][y] = Stone;
                 } else if (color.g == 255) {
                     field[x][y] = Terrain;
@@ -97,14 +125,14 @@ void World::update(float dt) {
 }
 
 void World::render() {
-    for (int x = -30; x < 30; x++) {
-        for (int y = -30; y < 30; y++) {
+    for (int x = -field_width; x < 2 * field_width; x++) {
+        for (int y = -field_height; y < 2 * field_height; y++) {
             renderWater(x, y);
         }
     }
 
-    for (int x = 0; x < 20; x++) {
-        for (int y = 0; y < 20; y++) {
+    for (int x = 0; x < field_width; x++) {
+        for (int y = 0; y < field_height; y++) {
             if (field[x][y] != Water) {
                 renderGrass(x - 1, y - 1);
                 switch (field[x][y]) {
@@ -424,10 +452,10 @@ void World::fillWater(int x, int y) {
 }
 
 bool World::hasWater(int x, int y) {
-    return x < 0
-           || x > field_width
-           || y < 0
-           || y > field_height
+    return x <= 0
+           || x >= field_width
+           || y <= 0
+           || y >= field_height
            || field[x][y] == Water;
 }
 

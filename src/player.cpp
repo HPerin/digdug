@@ -8,22 +8,46 @@
 #include "player.h"
 #include "data.h"
 
+bool C3DObject_Load_New_Player(const char *pszFilename, GLMmodel **model) {
+    char aszFilename[256];
+    strcpy(aszFilename, pszFilename);
+
+    if (*model) {
+
+        free(*model);
+        *model = NULL;
+    }
+
+    *model = glmReadOBJ(aszFilename);
+    if (!(*model))
+        return false;
+
+    glmUnitize(*model);
+    //glmScale(model,sFactor); // USED TO SCALE THE OBJECT
+    glmFacetNormals(*model);
+    glmVertexNormals(*model, 90.0);
+
+    return true;
+}
+
 Player::Player(World * world, sf::Window * window) {
     this->world = world;
     this->window = window;
-    current = { -10, 0, -10, 0, 0 };
+    current = { (float) -world->initialPlayerPosition.x, 0, (float) -world->initialPlayerPosition.y, 0, 0 };
 
-    camera = Above2D;
+    camera = ThirdPerson;
+
+    C3DObject_Load_New_Player("resource/drone/drone.obj", &playerModel);
 
     loadAudio();
 }
 
 void Player::loadAudio() {
-    footstepSoundBuffer.loadFromFile(FOOTSTEP_SOUND);
-    footstepSound.setBuffer(footstepSoundBuffer);
-
     fallingSoundBuffer.loadFromFile(FALLING_SOUND);
     fallingSound.setBuffer(fallingSoundBuffer);
+
+    airBlastSoundBuffer.loadFromFile(AIRBLAST_SOUND);
+    airBlastSound.setBuffer(airBlastSoundBuffer);
 }
 
 void Player::setCamera() {
@@ -99,24 +123,25 @@ void Player::update(float dt) {
     if (pushEnemy) {
         pushEnemy = false;
         if (pushEnemyClock.getElapsedTime().asSeconds() > 2) {
+            airBlastSound.play();
             pushEnemyClock.restart();
             for (Entity * entity : world->enemyList) {
                 Enemy * enemy = (Enemy*) entity;
                 switch(getDirection()) {
                     case Left:
-                        if (enemy->getCurrentY() == getCurrentGridZ() && enemy->getCurrentX() < getCurrentGridX() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 2)
+                        if (std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 1 && enemy->getCurrentX() < getCurrentGridX() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 2)
                             enemy->forceFollow(enemy->getCurrentX() - 2, enemy->getCurrentY());
                         break;
                     case Right:
-                        if (enemy->getCurrentY() == getCurrentGridZ() && enemy->getCurrentX() > getCurrentGridX() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 2)
+                        if (std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 1 && enemy->getCurrentX() > getCurrentGridX() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 2)
                             enemy->forceFollow(enemy->getCurrentX() + 2, enemy->getCurrentY());
                         break;
                     case Down:
-                        if (enemy->getCurrentY() < getCurrentGridZ() && enemy->getCurrentX() == getCurrentGridX() && std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 2)
+                        if (enemy->getCurrentY() < getCurrentGridZ() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 1 && std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 2)
                             enemy->forceFollow(enemy->getCurrentX(), enemy->getCurrentY() - 2);
                         break;
                     case Up:
-                        if (enemy->getCurrentY() > getCurrentGridZ() && enemy->getCurrentX() == getCurrentGridX() && std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 2)
+                        if (enemy->getCurrentY() > getCurrentGridZ() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 1 && std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 2)
                             enemy->forceFollow(enemy->getCurrentX(), enemy->getCurrentY() + 2);
                         break;
                 }
@@ -169,12 +194,6 @@ void Player::update(float dt) {
         if (world->hasStone((int) (-current.x + 1), (int) (-current.z + 1))) {
             current.z += dt * 2 * std::sin(current.roty * PI/180);
             current.x += dt * 2 * std::cos(current.roty * PI/180);
-        }
-    }
-
-    if (upPressed || downPressed || leftPressed || rightPressed) {
-        if (footstepSound.getStatus() != sf::SoundSource::Status::Playing) {
-            footstepSound.play();
         }
     }
 
@@ -242,6 +261,15 @@ void Player::changeCamera() {
 
 void Player::forceRender() {
     glPushMatrix();
+    glColor3f(1.f, 1.f, 1.f);
+    glTranslatef((GLfloat) (std::abs(current.x)), -current.y*2, (GLfloat) (std::abs(current.z)));
+    glRotatef(-current.roty, 0.f, 1.f, 0.f);
+    glScalef(0.5f, 0.5f, 0.5f);
+    //glTranslatef(-0.5f, 0.0f, -0.5f);
+    glmDraw(playerModel, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+    glPopMatrix();
+
+    /*glPushMatrix();
     glScalef(1.0f, 0.5f, 1.0f);
     glTranslatef((GLfloat) (std::abs(current.x)), -current.y*2, (GLfloat) (std::abs(current.z)));
     glRotatef(-current.roty, 0.f, 1.f, 0.f);
@@ -292,7 +320,7 @@ void Player::forceRender() {
     glVertex3f  ( 0.f, 0.f, 1.f);
     glEnd();
 
-    glPopMatrix();
+    glPopMatrix();*/
 }
 
 

@@ -11,8 +11,8 @@
 #include "world.h"
 #include "enemy.h"
 
-#define FOOTSTEP_SOUND "resource/footstep.wav"
 #define FALLING_SOUND  "resource/falling.wav"
+#define AIRBLAST_SOUND "resource/airblast.wav"
 
 typedef struct {
     float x;
@@ -58,16 +58,18 @@ private:
     int xDeltaMouse = 0;
     int yDeltaMouse = 0;
 
-    sf::SoundBuffer footstepSoundBuffer;
-    sf::Sound footstepSound;
-
     sf::SoundBuffer fallingSoundBuffer;
     sf::Sound fallingSound;
+
+    sf::SoundBuffer airBlastSoundBuffer;
+    sf::Sound airBlastSound;
 
     World * world;
     sf::Window * window;
 
     sf::Clock pushEnemyClock;
+
+    GLMmodel * playerModel;
 
     void loadAudio();
 

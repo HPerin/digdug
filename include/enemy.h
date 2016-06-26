@@ -6,7 +6,7 @@
 #define DIGDUG2_ENEMY_H
 
 #include <SFML/Graphics.hpp>
-#include <GL/gl.h>
+#include <glm.h>
 #include "entity.h"
 #include "world.h"
 
@@ -31,6 +31,8 @@ private:
     sf::Vector2i target;
 
     World * world;
+
+    GLMmodel * enemyModel;
 
     void die();
     bool following = false;

@@ -5,6 +5,28 @@
 #include <iostream>
 #include "enemy.h"
 
+bool C3DObject_Load_New_Enemy(const char *pszFilename, GLMmodel **model) {
+    char aszFilename[256];
+    strcpy(aszFilename, pszFilename);
+
+    if (*model) {
+
+        free(*model);
+        *model = NULL;
+    }
+
+    *model = glmReadOBJ(aszFilename);
+    if (!(*model))
+        return false;
+
+    glmUnitize(*model);
+    //glmScale(model,sFactor); // USED TO SCALE THE OBJECT
+    glmFacetNormals(*model);
+    glmVertexNormals(*model, 90.0);
+
+    return true;
+}
+
 Enemy::Enemy(int x, int y, World * world) {
     position.x = x;
     position.y = y;
@@ -14,6 +36,8 @@ Enemy::Enemy(int x, int y, World * world) {
 
     this->world = world;
     dead = false;
+
+    C3DObject_Load_New_Enemy("resource/drone/drone.obj", &enemyModel);
 }
 
 void Enemy::event(sf::Event event) {
@@ -76,6 +100,7 @@ void Enemy::render() {
 void Enemy::tryFollow(int x, int y) {
     if (dead) return;
     if (following) return;
+    if (accelerated) return;
 
     int tx = (int) round(position.x), ty = (int) round(position.y);
 
@@ -125,7 +150,21 @@ void Enemy::forceFollow(int x, int y) {
 }
 
 void Enemy::forceRender() {
+    int angle = 0;
+    if (target.x > round(position.x)) angle = 90;
+    else if (target.x < round(position.x)) angle = 270;
+    else if (target.y > round(position.y)) angle = 0;
+    else if (target.y < round(position.y)) angle = 180;
+
     glPushMatrix();
+    glColor3f   (1.0f,0.0f,0.0f);
+    glTranslatef(position.x-0.5f, 0, position.y-0.5f);
+    glScalef(0.5f, 0.5f, 0.5f);
+    glRotatef(angle, 0.f, 1.f, 0.f);
+    glmDraw(enemyModel, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+    glPopMatrix();
+
+    /*glPushMatrix();
     glScalef(1.0f, 0.5f, 1.0f);
     glTranslatef(position.x-1, 0, position.y-1);
 
@@ -174,7 +213,7 @@ void Enemy::forceRender() {
     glVertex3f  ( 0.f, 0.0f, 1.f);
     glEnd();
 
-    glPopMatrix();
+    glPopMatrix();*/
 }
 
 

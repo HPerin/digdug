@@ -7,6 +7,7 @@
 
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics.hpp>
+#include <glm.h>
 #include "entity.h"
 
 #define GRASS_TEXTURE "resource/grass.jpg"
@@ -15,7 +16,7 @@
 #define HOLE_TEXTURE  "resource/hole.jpg"
 #define CRACK_TEXTURE "resource/crack.jpg"
 
-#define MAP_BITMAP    "resource/map2.png"
+#define MAP_BITMAP    "resource/map.png"
 
 typedef enum {
     Water,
@@ -46,6 +47,7 @@ public:
     bool hasTerrain(int x, int y);
 
     std::vector<Entity*> enemyList;
+    sf::Vector2i initialPlayerPosition = {1, 1};
 
     bool hasStone(int x, int y);
 
