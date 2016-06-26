@@ -17,9 +17,13 @@ public:
     void event(sf::Event event);
     void update(float dt);
     void render();
+    void forceRender();
 
     void tryFollow(int x, int y);
-
+    void forceFollow(int x, int y);
+    int getCurrentX();
+    int getCurrentY();
+    bool dead;
 
     sf::Vector2f position;
 
@@ -29,7 +33,8 @@ private:
     World * world;
 
     void die();
-    bool dead;
+    bool following = false;
+    bool accelerated = false;
 };
 
 

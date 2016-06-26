@@ -31,6 +31,8 @@ private:
     std::vector<Entity *> entities;
 
     void stepUpdates();
+
+    void drawMiniMap();
 };
 
 

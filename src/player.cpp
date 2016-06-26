@@ -13,6 +13,8 @@ Player::Player(World * world, sf::Window * window) {
     this->window = window;
     current = { -10, 0, -10, 0, 0 };
 
+    camera = Above2D;
+
     loadAudio();
 }
 
@@ -25,9 +27,20 @@ void Player::loadAudio() {
 }
 
 void Player::setCamera() {
-    glRotatef(current.rotx, 1.f, 0.f, 0.f);
-    glRotatef(current.roty, 0.f, 1.f, 0.f);
-    glTranslatef(current.x, current.y, current.z);
+    if (camera == FirstPerson) {
+        glRotatef(current.rotx, 1.f, 0.f, 0.f);
+        glRotatef(current.roty, 0.f, 1.f, 0.f);
+        glTranslatef(current.x, current.y, current.z);
+    } else if (camera == ThirdPerson) {
+        glTranslatef(0.0f, -0.5f, -3.0f);
+        glRotatef(current.rotx, 1.f, 0.f, 0.f);
+        glRotatef(current.roty, 0.f, 1.f, 0.f);
+        glTranslatef(current.x, current.y, current.z);
+    } else if (camera == Above2D) {
+        glRotatef(90, 1.f, 0.f, 0.f);
+        glTranslatef(current.x, current.y, current.z);
+        glTranslatef(0.f, -10.f, 0.f);
+    }
 }
 
 void Player::event(sf::Event event) {
@@ -38,6 +51,8 @@ void Player::event(sf::Event event) {
                 case sf::Keyboard::A: leftPressed = true; break;
                 case sf::Keyboard::D: rightPressed = true; break;
                 case sf::Keyboard::S: downPressed = true; break;
+                case sf::Keyboard::F: pushEnemy = true; break;
+                case sf::Keyboard::V: changeCamera(); break;
                 case sf::Keyboard::Left: rotLeftPressed = true; break;
                 case sf::Keyboard::Right: rotRightPressed = true; break;
                 case sf::Keyboard::Space: generateCrack(); break;
@@ -81,36 +96,80 @@ void Player::update(float dt) {
         return;
     }
 
+    if (pushEnemy) {
+        pushEnemy = false;
+        if (pushEnemyClock.getElapsedTime().asSeconds() > 2) {
+            pushEnemyClock.restart();
+            for (Entity * entity : world->enemyList) {
+                Enemy * enemy = (Enemy*) entity;
+                switch(getDirection()) {
+                    case Left:
+                        if (enemy->getCurrentY() == getCurrentGridZ() && enemy->getCurrentX() < getCurrentGridX() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 2)
+                            enemy->forceFollow(enemy->getCurrentX() - 2, enemy->getCurrentY());
+                        break;
+                    case Right:
+                        if (enemy->getCurrentY() == getCurrentGridZ() && enemy->getCurrentX() > getCurrentGridX() && std::abs(enemy->getCurrentX() - getCurrentGridX()) <= 2)
+                            enemy->forceFollow(enemy->getCurrentX() + 2, enemy->getCurrentY());
+                        break;
+                    case Down:
+                        if (enemy->getCurrentY() < getCurrentGridZ() && enemy->getCurrentX() == getCurrentGridX() && std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 2)
+                            enemy->forceFollow(enemy->getCurrentX(), enemy->getCurrentY() - 2);
+                        break;
+                    case Up:
+                        if (enemy->getCurrentY() > getCurrentGridZ() && enemy->getCurrentX() == getCurrentGridX() && std::abs(enemy->getCurrentY() - getCurrentGridZ()) <= 2)
+                            enemy->forceFollow(enemy->getCurrentX(), enemy->getCurrentY() + 2);
+                        break;
+                }
+            }
+        }
+    }
+
     for (Entity * entity : world->enemyList) {
         Enemy * enemy = (Enemy*) entity;
-        if (round(enemy->position.x+1) == std::abs(round(current.x)) &&
-            round(enemy->position.y+1) == std::abs(round(current.z))) {
+        if (round(enemy->position.x) == getCurrentGridX() &&
+            round(enemy->position.y) == getCurrentGridZ()) {
             falling = true;
             fallingSound.play();
         }
 
-        int dist_x = (int) std::abs(round(enemy->position.x + 1) - std::abs(round(current.x)));
-        int dist_y = (int) std::abs(round(enemy->position.y + 1) - std::abs(round(current.z)));
+        int dist_x = (int) std::abs(round(enemy->position.x) - getCurrentGridX());
+        int dist_y = (int) std::abs(round(enemy->position.y) - getCurrentGridZ());
         int dist = (int) sqrt(dist_x * dist_x + dist_y + dist_y);
         if (dist < 5) {
-            enemy->tryFollow((int) (std::abs(round(current.x)) - 1), (int) (std::abs(round(current.z))) - 1);
+            enemy->tryFollow(getCurrentGridX(), getCurrentGridZ());
         }
     }
 
     if (upPressed) {
         current.z += dt * 2 * std::cos(current.roty * PI/180);
         current.x -= dt * 2 * std::sin(current.roty * PI/180);
+        if (world->hasStone((int) (-current.x + 1), (int) (-current.z + 1))) {
+            current.z -= dt * 2 * std::cos(current.roty * PI/180);
+            current.x += dt * 2 * std::sin(current.roty * PI/180);
+        }
     } else if (downPressed) {
         current.z -= dt * 2 * std::cos(current.roty * PI/180);
         current.x += dt * 2 * std::sin(current.roty * PI/180);
+        if (world->hasStone((int) (-current.x + 1), (int) (-current.z + 1))) {
+            current.z += dt * 2 * std::cos(current.roty * PI/180);
+            current.x -= dt * 2 * std::sin(current.roty * PI/180);
+        }
     }
     if (leftPressed) {
         current.z += dt * 2 * std::sin(current.roty * PI/180);
         current.x += dt * 2 * std::cos(current.roty * PI/180);
+        if (world->hasStone((int) (-current.x + 1), (int) (-current.z + 1))) {
+            current.z -= dt * 2 * std::sin(current.roty * PI/180);
+            current.x -= dt * 2 * std::cos(current.roty * PI/180);
+        }
     }
     if (rightPressed) {
         current.z -= dt * 2 * std::sin(current.roty * PI/180);
         current.x -= dt * 2 * std::cos(current.roty * PI/180);
+        if (world->hasStone((int) (-current.x + 1), (int) (-current.z + 1))) {
+            current.z += dt * 2 * std::sin(current.roty * PI/180);
+            current.x += dt * 2 * std::cos(current.roty * PI/180);
+        }
     }
 
     if (upPressed || downPressed || leftPressed || rightPressed) {
@@ -142,10 +201,16 @@ void Player::update(float dt) {
 }
 
 void Player::render() {
+    if (camera == FirstPerson) return;
 
+    forceRender();
 }
 
 void Player::generateCrack() {
+    world->generateCrack(getCurrentGridX(), getCurrentGridZ(), getDirection());
+}
+
+Direction Player::getDirection() {
     current.roty = int(current.roty) % 360;
     while (current.roty < 0) current.roty += 360;
     Direction direction;
@@ -158,7 +223,7 @@ void Player::generateCrack() {
     } else {
         direction = Left;
     }
-    world->generateCrack(getCurrentGridX(), getCurrentGridZ(), direction);
+    return direction;
 }
 
 int Player::getCurrentGridX() {
@@ -168,6 +233,69 @@ int Player::getCurrentGridX() {
 int Player::getCurrentGridZ() {
     return int(-current.z + 1);
 }
+
+void Player::changeCamera() {
+    if (camera == FirstPerson) camera = ThirdPerson;
+    else if (camera == ThirdPerson) camera = Above2D;
+    else camera = FirstPerson;
+}
+
+void Player::forceRender() {
+    glPushMatrix();
+    glScalef(1.0f, 0.5f, 1.0f);
+    glTranslatef((GLfloat) (std::abs(current.x)), -current.y*2, (GLfloat) (std::abs(current.z)));
+    glRotatef(-current.roty, 0.f, 1.f, 0.f);
+    glTranslatef(-0.5f, 0.0f, -0.5f);
+
+    glBegin(GL_QUADS);
+    glColor3f   (1.0f,0.0f,0.0f);
+
+    glTexCoord2f(      1.f, 0.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glTexCoord2f(      1.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glTexCoord2f(      0.f, 1.f);
+    glVertex3f  ( 0.f,-1.f, 1.f);
+    glTexCoord2f(      0.f, 0.f);
+    glVertex3f  ( 0.f,-1.f, 0.f);
+
+    glTexCoord2f(      1.f, 1.f);
+    glVertex3f  ( 1.f, 0.f, 1.f);
+    glTexCoord2f(      1.f, 0.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
+    glTexCoord2f(      0.f, 0.f);
+    glVertex3f  ( 1.f,-1.f, 0.f);
+    glTexCoord2f(      0.f, 1.f);
+    glVertex3f  ( 1.f,-1.f, 1.f);
+
+    glTexCoord2f( 1.f, 1.f);
+    glVertex3f  ( 1.f, 0.f, 1.f);
+    glTexCoord2f( 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glTexCoord2f( 0.f, 0.f);
+    glVertex3f  ( 0.f,-1.f, 1.f);
+    glTexCoord2f( 1.f, 0.f);
+    glVertex3f  ( 1.f,-1.f, 1.f);
+
+    glTexCoord2f( 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glTexCoord2f( 1.f, 1.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
+    glTexCoord2f( 1.f, 0.f);
+    glVertex3f  ( 1.f,-1.f, 0.f);
+    glTexCoord2f( 0.f, 0.f);
+    glVertex3f  ( 0.f,-1.f, 0.f);
+
+    glVertex3f  ( 0.f, 0.f, 0.f);
+    glVertex3f  ( 1.f, 0.f, 0.f);
+    glVertex3f  ( 1.f, 0.f, 1.f);
+    glVertex3f  ( 0.f, 0.f, 1.f);
+    glEnd();
+
+    glPopMatrix();
+}
+
+
 
 
 

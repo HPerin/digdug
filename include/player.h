@@ -30,11 +30,19 @@ public:
     void event(sf::Event event);
     void update(float dt);
     void render();
+    void forceRender();
+
+    enum {
+        FirstPerson,
+        ThirdPerson,
+        Above2D
+    } camera;
 
 private:
     void generateCrack();
     int getCurrentGridX();
     int getCurrentGridZ();
+    Direction getDirection();
 
     position_t current;
 
@@ -44,6 +52,7 @@ private:
     bool downPressed = false;
     bool rotLeftPressed = false;
     bool rotRightPressed = false;
+    bool pushEnemy = true;
     bool falling = false;
 
     int xDeltaMouse = 0;
@@ -58,7 +67,11 @@ private:
     World * world;
     sf::Window * window;
 
+    sf::Clock pushEnemyClock;
+
     void loadAudio();
+
+    void changeCamera();
 };
 
 

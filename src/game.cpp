@@ -38,6 +38,7 @@ Game::~Game() {
 
 void Game::run() {
     while(window->isOpen()) {
+        windowReshape();
         stepRender();
         stepEvents();
         stepUpdates();
@@ -45,14 +46,25 @@ void Game::run() {
 }
 
 void Game::windowReshape() {
-    glViewport      (0, 0, window->getSize().x, window->getSize().y);
+    if (player->camera == Player::Above2D) {
+        glViewport(0, 0, window->getSize().x, window->getSize().y);
 
-    glMatrixMode    (GL_PROJECTION);
-    glLoadIdentity  ();
-    setPerspective  (45, float(window->getSize().x)/float(window->getSize().y), 0.1f, 1000.f);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-105.0f, 105, -105.0f, 105, 0.1f, 1000.0f);
 
-    glMatrixMode    (GL_MODELVIEW);
-    glLoadIdentity  ();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    } else {
+        glViewport(0, 0, window->getSize().x, window->getSize().y);
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        setPerspective(45, float(window->getSize().x) / float(window->getSize().y), 0.1f, 1000.f);
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+    }
 }
 
 void Game::stepEvents() {
@@ -95,6 +107,7 @@ void Game::stepRender() {
     for (Entity * entity : world->enemyList) {
         entity->render();
     }
+    drawMiniMap();
 
     glFlush();
 
@@ -118,6 +131,34 @@ void Game::stepUpdates() {
     for (Entity * entity : world->enemyList) {
         entity->update(elapsed.asSeconds());
     }
+}
+
+void Game::drawMiniMap() {
+    glViewport(0, 0, window->getSize().x / 5, window->getSize().y / 5);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-105.0f, 105, -105.0f, 105, 0.1f, 1000.0f);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glScalef(10.f, 10.f, 10.f);
+
+    //player->setCamera();
+    glRotatef(90, 1.f, 0.f, 0.f);
+    glTranslatef(-10.f, 0.f, -10.f);
+    glTranslatef(0.f, -10.f, 0.f);
+    player->forceRender();
+    for (Entity * entity : entities) {
+        entity->render();
+    }
+    for (Entity * entity : world->enemyList) {
+        entity->render();
+    }
+
+    windowReshape();
 }
 
 

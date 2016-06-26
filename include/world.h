@@ -47,6 +47,8 @@ public:
 
     std::vector<Entity*> enemyList;
 
+    bool hasStone(int x, int y);
+
 private:
     void renderWater (int x, int y);
     void renderGrass(int x, int y);
@@ -76,6 +78,10 @@ private:
     void fillBool(bool ** bool_field, int x, int y);
     int fillSize(bool ** bool_field, int x, int y);
     void initFalse(bool ** bool_field);
+
+    void deleteCracks();
+
+    void renderStone(int x, int y);
 };
 
 
