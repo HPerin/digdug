@@ -157,11 +157,15 @@ void Enemy::forceRender() {
     else if (target.y < round(position.y)) angle = 180;
 
     glPushMatrix();
+    GLfloat emission[] = { 0.5f, 0.f, 0.f, 1.f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emission);
     glColor3f   (1.0f,0.0f,0.0f);
     glTranslatef(position.x-0.5f, 0, position.y-0.5f);
     glScalef(0.5f, 0.5f, 0.5f);
     glRotatef(angle, 0.f, 1.f, 0.f);
     glmDraw(enemyModel, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+    GLfloat noEmission[] = { 0.f, 0.f, 0.f, 1.f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, noEmission);
     glPopMatrix();
 
     /*glPushMatrix();

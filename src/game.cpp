@@ -19,6 +19,9 @@ Game::Game() {
 
     windowReshape();
 
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_TEXTURE_2D);
@@ -28,8 +31,8 @@ Game::Game() {
     world = new World();
     player = new Player(world, window);
 
-    entities.push_back((Entity *const &) player);
     entities.push_back((Entity *const &) world);
+    entities.push_back((Entity *const &) player);
 }
 
 Game::~Game() {

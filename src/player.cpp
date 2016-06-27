@@ -45,6 +45,7 @@ Player::Player(World * world, sf::Window * window) {
 void Player::loadAudio() {
     fallingSoundBuffer.loadFromFile(FALLING_SOUND);
     fallingSound.setBuffer(fallingSoundBuffer);
+    fallingSound.setVolume(0.5);
 
     airBlastSoundBuffer.loadFromFile(AIRBLAST_SOUND);
     airBlastSound.setBuffer(airBlastSoundBuffer);
@@ -261,12 +262,16 @@ void Player::changeCamera() {
 
 void Player::forceRender() {
     glPushMatrix();
+    GLfloat emission[] = { 0.5f, 0.5f, 0.5f, 1.f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emission);
     glColor3f(1.f, 1.f, 1.f);
     glTranslatef((GLfloat) (std::abs(current.x)), -current.y*2, (GLfloat) (std::abs(current.z)));
     glRotatef(-current.roty, 0.f, 1.f, 0.f);
     glScalef(0.5f, 0.5f, 0.5f);
     //glTranslatef(-0.5f, 0.0f, -0.5f);
     glmDraw(playerModel, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+    GLfloat noEmission[] = { 0.f, 0.f, 0.f, 1.f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, noEmission);
     glPopMatrix();
 
     /*glPushMatrix();

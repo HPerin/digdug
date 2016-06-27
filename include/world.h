@@ -81,6 +81,8 @@ private:
     int fillSize(bool ** bool_field, int x, int y);
     void initFalse(bool ** bool_field);
 
+    GLMmodel * sunModel;
+
     void deleteCracks();
 
     void renderStone(int x, int y);

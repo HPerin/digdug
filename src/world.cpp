@@ -35,6 +35,8 @@ World::World() {
     loadField();
 
     loadTextures();
+
+    C3DObject_Load_New_World("resource/ball/ball.obj", &sunModel);
 }
 
 World::~World() {
@@ -125,6 +127,22 @@ void World::update(float dt) {
 }
 
 void World::render() {
+    GLfloat ambient[] = { 0.5f, 0.5f, 0.5f, 1.f };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+    GLfloat diffuse[] = { 10.f, 10.f, 10.f, 1.f };
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    GLfloat position[] = { 10.f, 5.f, 10.f, 0.f };
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glPushMatrix();
+    GLfloat emission[] = { 1.f, 1.f, 0.f, 1.f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, emission);
+    glTranslatef(30.f, 5.f, 30.f);
+    glmDraw(sunModel, GLM_SMOOTH | GLM_MATERIAL | GLM_TEXTURE);
+    GLfloat noEmission[] = { 0.f, 0.f, 0.f, 1.f };
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, noEmission);
+    glPopMatrix();
+
     for (int x = -field_width; x < 2 * field_width; x++) {
         for (int y = -field_height; y < 2 * field_height; y++) {
             renderWater(x, y);
@@ -581,6 +599,8 @@ void World::renderStone(int x, int y) {
 bool World::hasStone(int x, int y) {
     return field[x][y] == Stone;
 }
+
+
 
 
 
